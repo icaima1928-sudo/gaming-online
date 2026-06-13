@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product - Gaming Online</title>
+  <meta name="description" content="Product detail page - Gaming Online Retro Arcade Store">
+  <link rel="canonical" href="https://gaming-online.shop/product">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div id="navbar-placeholder"></div>
+
+<!-- BACK BUTTON -->
+<a href="catalog.html" class="back-btn">← BACK TO STORE</a>
+
+<!-- PRODUCT DETAIL -->
+<div id="product-detail-container"></div>
+
+<!-- RELATED PRODUCTS -->
+<div class="section" id="related-section" style="display:none;">
+  <div class="section-header">
+    <div class="section-title">YOU MAY ALSO LIKE</div>
+  </div>
+  <div class="product-grid" id="related-grid"></div>
+</div>
+
+<!-- FOOTER -->
+<div id="footer-placeholder"></div>
+
+<script src="js/app.js"></script>
+<script src="js/layout.js"></script>
+<script>
+let currentQty = 1;
+
+document.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const handle = params.get('id');
+  const product = PRODUCTS.find(p => p.handle === handle);
+  const container = document.getElementById('product-detail-container');
+
+  if (!product || !container) {
+    container.innerHTML = `
+      <div style="text-align:center;padding:80px 20px;">
+        <div style="font-family:'Press Start 2P',monospace;font-size:20px;color:var(--magenta);margin-bottom:20px;">404</div>
+        <div style="font-family:'Press Start 2P',monospace;font-size:12px;color:var(--gray);margin-bottom:30px;">PRODUCT NOT FOUND</div>
+        <a href="catalog.html" class="btn-primary">← BACK TO CATALOG</a>
+      </div>
+    `;
+    return;
+  }
+
+  // Update page title & canonical
+  document.title = `${product.title} - Gaming Online`;
+  document.querySelector('link[rel="canonical"]').href = `https://gaming-online.shop/product?id=${product.handle}`;
+
+  container.innerHTML = `
+    <div class="product-detail-wrap">
+      <div>
+        <img class="pd-image-main" src="${product.image}" alt="${product.title}" onerror="this.src='images/placeholder.png'">
+      </div>
+      <div>
+        <div class="pd-breadcrumb">
+          <a href="index.html">HOME</a> /
+          <a href="catalog.html?category=${encodeURIComponent(product.type)}">${product.type}</a> /
+          <span>${product.title}</span>
+        </div>
+        <div class="pd-type-badge">${product.type}</div>
+        <h1 class="pd-title">${product.title}</h1>
+        <div class="pd-price">
+          $${product.price.toFixed(2)}
+          ${product.comparePrice ? `<span style="font-size:14px;color:var(--gray);text-decoration:line-through;margin-left:12px;">$${product.comparePrice.toFixed(2)}</span>` : ''}
+        </div>
+        <p class="pd-desc">${product.description}</p>
+
+        <div class="pd-qty-row">
+          <span class="qty-label">QTY:</span>
+          <div class="qty-controls">
+            <button class="qty-btn" onclick="changeQty(-1)">−</button>
+            <div class="qty-val" id="qty-display">1</div>
+            <button class="qty-btn" onclick="changeQty(1)">+</button>
+          </div>
+        </div>
+
+        <button class="btn-add-cart-lg" onclick="addToCart(${product.id}, currentQty)">
+          🛒 ADD TO CART
+        </button>
+        <a href="catalog.html" class="btn-outline" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;font-family:'Press Start 2P',monospace;font-size:10px;">
+          ← CONTINUE SHOPPING
+        </a>
+
+        <div class="pd-features">
+          ${product.features.map(f => `
+            <div class="pd-feature">
+              <span class="pd-feature-icon">✓</span>
+              <span>${f}</span>
+            </div>
+          `).join('')}
+        </div>
+
+        <div class="pd-tags">
+          ${product.tags.map(t => `<span class="pd-tag">#${t}</span>`).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Related products (same type, exclude current)
+  const related = PRODUCTS.filter(p => p.type === product.type && p.id !== product.id).slice(0, 4);
+  if (related.length > 0) {
+    const relSection = document.getElementById('related-section');
+    const relGrid = document.getElementById('related-grid');
+    if (relSection) relSection.style.display = 'block';
+    if (relGrid) {
+      relGrid.innerHTML = related.map(p => `
+        <div class="product-card" onclick="window.location.href='product.html?id=${p.handle}'">
+          <div class="product-img-wrap">
+            <img src="${p.image}" alt="${p.title}" loading="lazy" onerror="this.style.display='none'">
+            ${p.badge ? `<div class="product-badge ${p.badge === 'SALE' ? 'sale' : ''}">${p.badge}</div>` : ''}
+            <div class="product-type-badge">${p.type}</div>
+          </div>
+          <div class="product-info">
+            <div class="product-title">${p.title}</div>
+            <div class="product-price">
+              <span class="price-current">$${p.price.toFixed(2)}</span>
+              ${p.comparePrice ? `<span class="price-old">$${p.comparePrice.toFixed(2)}</span>` : ''}
+            </div>
+            <button class="btn-add-cart" onclick="event.stopPropagation(); addToCart(${p.id})">
+              🛒 ADD TO CART
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+  }
+});
+
+function changeQty(delta) {
+  currentQty = Math.max(1, currentQty + delta);
+  const el = document.getElementById('qty-display');
+  if (el) el.textContent = currentQty;
+}
+</script>
+</body>
+</html>

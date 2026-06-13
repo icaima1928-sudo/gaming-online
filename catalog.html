@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catalog - Gaming Online</title>
+  <meta name="description" content="Browse all PC Games, Console Games, Accessories, and Gift Cards at Gaming Online.">
+  <link rel="canonical" href="https://gaming-online.shop/catalog">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div id="navbar-placeholder"></div>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="page-header-inner">
+    <div class="page-title" id="page-title">ALL PRODUCTS</div>
+    <div class="page-count" id="page-count">LOADING...</div>
+  </div>
+</div>
+
+<!-- CONTROLS -->
+<div class="catalog-controls">
+  <div class="search-input-wrap">
+    <input type="text" class="search-input" id="catalog-search" placeholder="SEARCH PRODUCTS...">
+    <button class="btn-search-go" onclick="applyFilters()">🔍</button>
+  </div>
+  <div class="filter-tabs" id="filter-tabs">
+    <button class="filter-tab active" data-cat="All" onclick="selectCategory('All', this)">ALL</button>
+    <button class="filter-tab" data-cat="PC Games" onclick="selectCategory('PC Games', this)">PC GAMES</button>
+    <button class="filter-tab" data-cat="Console Games" onclick="selectCategory('Console Games', this)">CONSOLE</button>
+    <button class="filter-tab" data-cat="Accessories" onclick="selectCategory('Accessories', this)">ACCESSORIES</button>
+    <button class="filter-tab" data-cat="Gift Cards" onclick="selectCategory('Gift Cards', this)">GIFT CARDS</button>
+  </div>
+</div>
+
+<!-- PRODUCT GRID -->
+<div class="catalog-grid-wrap">
+  <div class="product-grid" id="catalog-grid"></div>
+  <div class="no-results hidden" id="no-results">NO PRODUCTS FOUND 😢</div>
+</div>
+
+<!-- FOOTER -->
+<div id="footer-placeholder"></div>
+
+<script src="js/app.js"></script>
+<script src="js/layout.js"></script>
+<script>
+let activeCategory = 'All';
+
+function selectCategory(cat, btn) {
+  activeCategory = cat;
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  applyFilters();
+  // Update URL
+  const url = new URL(window.location);
+  if (cat === 'All') url.searchParams.delete('category');
+  else url.searchParams.set('category', cat);
+  history.replaceState({}, '', url);
+}
+
+function applyFilters() {
+  const query = document.getElementById('catalog-search')?.value.toLowerCase().trim() || '';
+  let filtered = PRODUCTS;
+
+  if (activeCategory !== 'All') {
+    filtered = filtered.filter(p => p.type === activeCategory);
+  }
+  if (query) {
+    filtered = filtered.filter(p =>
+      p.title.toLowerCase().includes(query) ||
+      p.type.toLowerCase().includes(query) ||
+      p.tags.some(t => t.includes(query))
+    );
+  }
+
+  const grid = document.getElementById('catalog-grid');
+  const noResults = document.getElementById('no-results');
+  const pageCount = document.getElementById('page-count');
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '';
+    noResults?.classList.remove('hidden');
+  } else {
+    noResults?.classList.add('hidden');
+    grid.innerHTML = filtered.map(p => `
+      <div class="product-card" onclick="window.location.href='product.html?id=${p.handle}'">
+        <div class="product-img-wrap">
+          <img src="${p.image}" alt="${p.title}" loading="lazy" onerror="this.style.display='none'">
+          ${p.badge ? `<div class="product-badge ${p.badge === 'SALE' ? 'sale' : ''}">${p.badge}</div>` : ''}
+          <div class="product-type-badge">${p.type}</div>
+        </div>
+        <div class="product-info">
+          <div class="product-title">${p.title}</div>
+          <div class="product-price">
+            <span class="price-current">$${p.price.toFixed(2)}</span>
+            ${p.comparePrice ? `<span class="price-old">$${p.comparePrice.toFixed(2)}</span>` : ''}
+          </div>
+          <button class="btn-add-cart" onclick="event.stopPropagation(); addToCart(${p.id})">
+            🛒 ADD TO CART
+          </button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  if (pageCount) pageCount.textContent = `${filtered.length} PRODUCT${filtered.length !== 1 ? 'S' : ''} FOUND`;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Read URL params
+  const params = new URLSearchParams(window.location.search);
+  const cat = params.get('category') || 'All';
+  activeCategory = cat;
+
+  // Update active tab
+  document.querySelectorAll('.filter-tab').forEach(tab => {
+    tab.classList.toggle('active', tab.dataset.cat === cat);
+  });
+
+  // Update page title
+  const titleEl = document.getElementById('page-title');
+  if (titleEl) titleEl.textContent = cat === 'All' ? 'ALL PRODUCTS' : cat.toUpperCase();
+
+  // Search input live filter
+  document.getElementById('catalog-search')?.addEventListener('input', applyFilters);
+
+  applyFilters();
+});
+</script>
+</body>
+</html>
