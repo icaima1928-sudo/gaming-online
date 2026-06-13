@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gaming Online - Retro Arcade Game Store</title>
+  <meta name="description" content="Toko game online terbaik. PC Games, Console Games, Accessories, dan Gift Cards dengan desain retro arcade.">
+  <link rel="canonical" href="https://gaming-online.shop/">
+  <meta property="og:title" content="Gaming Online - Retro Arcade Game Store">
+  <meta property="og:description" content="PC Games, Console Games, Accessories & Gift Cards">
+  <meta property="og:url" content="https://gaming-online.shop/">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div id="navbar-placeholder"></div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="pixel-float"></div>
+  <div class="pixel-float"></div>
+  <div class="pixel-float"></div>
+  <div class="pixel-float"></div>
+  <div class="pixel-float"></div>
+  <div class="hero-content">
+    <div class="hero-badge">⚡ INSERT COIN TO PLAY _</div>
+    <h1 class="hero-title">
+      LEVEL UP YOUR<br>
+      <span class="accent">GAMING SETUP</span>
+    </h1>
+    <p class="hero-sub">THE ULTIMATE RETRO ARCADE STORE FOR PC GAMES,<br>CONSOLE TITLES, ACCESSORIES &amp; GIFT CARDS</p>
+    <div class="hero-btns">
+      <a href="catalog.html" class="btn-primary">🎮 SHOP NOW</a>
+      <a href="catalog.html?category=PC+Games" class="btn-outline">⚡ PC GAMES</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-num">500+</div><div class="stat-label">GAMES</div></div>
+      <div class="stat"><div class="stat-num">24/7</div><div class="stat-label">SUPPORT</div></div>
+      <div class="stat"><div class="stat-num">100%</div><div class="stat-label">DIGITAL</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CATEGORIES -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-title">BROWSE CATEGORIES</div>
+    <a href="catalog.html" class="view-all">VIEW ALL →</a>
+  </div>
+  <div class="cat-grid" id="cat-grid"></div>
+</div>
+
+<!-- FEATURED PRODUCTS -->
+<div class="section" style="padding-top:0;">
+  <div class="section-header">
+    <div class="section-title">FEATURED GAMES</div>
+    <a href="catalog.html" class="view-all">VIEW ALL →</a>
+  </div>
+  <div class="product-grid" id="featured-grid"></div>
+</div>
+
+<!-- PROMO BANNER -->
+<div class="promo-section">
+  <div class="promo-banner">
+    <div>
+      <div class="promo-tag">⚡ LIMITED TIME OFFER</div>
+      <div class="promo-title">GET <span>20% OFF</span><br>YOUR FIRST ORDER</div>
+      <div class="promo-desc">Use code RETRO20 at checkout. Valid on all PC Games and Console titles.</div>
+    </div>
+    <a href="catalog.html" class="btn-primary" style="flex-shrink:0;">🎮 CLAIM OFFER</a>
+  </div>
+</div>
+
+<!-- ALL PRODUCTS -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-title">ALL PRODUCTS</div>
+    <a href="catalog.html" class="view-all">CATALOG →</a>
+  </div>
+  <div class="product-grid" id="all-products-grid"></div>
+</div>
+
+<!-- FOOTER -->
+<div id="footer-placeholder"></div>
+
+<script src="js/app.js"></script>
+<script src="js/layout.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Render categories
+  const catGrid = document.getElementById('cat-grid');
+  if (catGrid) {
+    catGrid.innerHTML = CATEGORIES.map(c => `
+      <a href="catalog.html?category=${encodeURIComponent(c.name)}" class="cat-card">
+        <div class="cat-icon">${c.icon}</div>
+        <div class="cat-name">${c.name}</div>
+        <div class="cat-desc">${c.desc}</div>
+        <div class="cat-link">> BROWSE ${c.name.toUpperCase()}</div>
+      </a>
+    `).join('');
+  }
+
+  // Render featured (first 4)
+  const featGrid = document.getElementById('featured-grid');
+  if (featGrid) {
+    featGrid.innerHTML = PRODUCTS.slice(0, 4).map(p => renderProductCard(p)).join('');
+  }
+
+  // Render all products
+  const allGrid = document.getElementById('all-products-grid');
+  if (allGrid) {
+    allGrid.innerHTML = PRODUCTS.map(p => renderProductCard(p)).join('');
+  }
+});
+
+function renderProductCard(p) {
+  return `
+    <div class="product-card" onclick="window.location.href='product.html?id=${p.handle}'">
+      <div class="product-img-wrap">
+        <img src="${p.image}" alt="${p.title}" loading="lazy" onerror="this.style.display='none'">
+        ${p.badge ? `<div class="product-badge ${p.badge === 'SALE' ? 'sale' : ''}">${p.badge}</div>` : ''}
+        <div class="product-type-badge">${p.type}</div>
+      </div>
+      <div class="product-info">
+        <div class="product-title">${p.title}</div>
+        <div class="product-price">
+          <span class="price-current">$${p.price.toFixed(2)}</span>
+          ${p.comparePrice ? `<span class="price-old">$${p.comparePrice.toFixed(2)}</span>` : ''}
+        </div>
+        <button class="btn-add-cart" onclick="event.stopPropagation(); addToCart(${p.id})">
+          🛒 ADD TO CART
+        </button>
+      </div>
+    </div>
+  `;
+}
+</script>
+</body>
+</html>
